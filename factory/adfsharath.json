@@ -1,0 +1,9 @@
+{
+	"name": "adfsharath",
+	"location": "uksouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "012bb10d-614a-4fba-b405-99b0900a584f",
+		"tenantId": "f9215390-2808-4d2d-a2d7-bb7b9e214a28"
+	}
+}
