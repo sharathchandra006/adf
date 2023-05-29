@@ -5,16 +5,40 @@
 		"factoryName": {
 			"value": "adfsharath"
 		},
+		"csvroutes_accountKey": {
+			"value": ""
+		},
+		"csvrouting_accountKey": {
+			"value": ""
+		},
 		"ds_csv_ls_accountKey": {
 			"value": ""
 		},
 		"outcsv_accountKey": {
 			"value": ""
 		},
+		"ds_source_csv_rec_check_accountKey": {
+			"value": ""
+		},
+		"checked_output_accountKey": {
+			"value": ""
+		},
+		"csvroutes_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
+		},
+		"csvrouting_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
+		},
 		"ds_csv_ls_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		},
 		"outcsv_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
+		},
+		"ds_source_csv_rec_check_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
+		},
+		"checked_output_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		}
 	}

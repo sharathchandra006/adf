@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfsharath"
 		},
+		"csvroutes_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'csvroutes'"
+		},
+		"csvrouting_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'csvrouting'"
+		},
 		"ds_csv_ls_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ds_csv_ls'"
@@ -15,11 +23,35 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'outcsv'"
 		},
+		"ds_source_csv_rec_check_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ds_source_csv_rec_check'"
+		},
+		"checked_output_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'checked_output'"
+		},
+		"csvroutes_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://shaadf.dfs.core.windows.net/"
+		},
+		"csvrouting_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://shaadf.dfs.core.windows.net/"
+		},
 		"ds_csv_ls_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://shaadf.dfs.core.windows.net/"
 		},
 		"outcsv_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://shaadf.dfs.core.windows.net/"
+		},
+		"ds_source_csv_rec_check_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://shaadf.dfs.core.windows.net/"
+		},
+		"checked_output_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://shaadf.dfs.core.windows.net/"
 		},
@@ -50,17 +82,41 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"csvroutes_accountKey": {
+						"value": "[parameters('csvroutes_accountKey')]"
+					},
+					"csvrouting_accountKey": {
+						"value": "[parameters('csvrouting_accountKey')]"
+					},
 					"ds_csv_ls_accountKey": {
 						"value": "[parameters('ds_csv_ls_accountKey')]"
 					},
 					"outcsv_accountKey": {
 						"value": "[parameters('outcsv_accountKey')]"
 					},
+					"ds_source_csv_rec_check_accountKey": {
+						"value": "[parameters('ds_source_csv_rec_check_accountKey')]"
+					},
+					"checked_output_accountKey": {
+						"value": "[parameters('checked_output_accountKey')]"
+					},
+					"csvroutes_properties_typeProperties_url": {
+						"value": "[parameters('csvroutes_properties_typeProperties_url')]"
+					},
+					"csvrouting_properties_typeProperties_url": {
+						"value": "[parameters('csvrouting_properties_typeProperties_url')]"
+					},
 					"ds_csv_ls_properties_typeProperties_url": {
 						"value": "[parameters('ds_csv_ls_properties_typeProperties_url')]"
 					},
 					"outcsv_properties_typeProperties_url": {
 						"value": "[parameters('outcsv_properties_typeProperties_url')]"
+					},
+					"ds_source_csv_rec_check_properties_typeProperties_url": {
+						"value": "[parameters('ds_source_csv_rec_check_properties_typeProperties_url')]"
+					},
+					"checked_output_properties_typeProperties_url": {
+						"value": "[parameters('checked_output_properties_typeProperties_url')]"
 					}
 				}
 			},
