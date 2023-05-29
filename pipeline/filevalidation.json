@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "ds_overs_csv",
+						"referenceName": "ds_source_csv_rec_check",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
@@ -84,6 +84,11 @@
 										"type": "AzureBlobFSReadSettings",
 										"recursive": true,
 										"modifiedDatetimeStart": "2023-05-28T00:00:00Z",
+										"wildcardFolderPath": "source",
+										"wildcardFileName": {
+											"value": "@activity('Get Metadata1').output.itemName",
+											"type": "Expression"
+										},
 										"enablePartitionDiscovery": false
 									},
 									"formatSettings": {
@@ -93,7 +98,8 @@
 								"sink": {
 									"type": "DelimitedTextSink",
 									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings"
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "MergeFiles"
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
@@ -128,14 +134,20 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_overs_csv",
+									"referenceName": "ds_source_csv_rec_check",
 									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "csvoutput",
-									"type": "DatasetReference"
+									"referenceName": "checked_output",
+									"type": "DatasetReference",
+									"parameters": {
+										"file": {
+											"value": "@activity('Get Metadata1').output.itemName",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -167,13 +179,18 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "ds_overs_csv",
+						"referenceName": "ds_source_csv_rec_check",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
 			}
 		],
+		"parameters": {
+			"file": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"lastPublishTime": "2023-05-28T14:09:32Z"
 	},
