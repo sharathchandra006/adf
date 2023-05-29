@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "csv",
+				"fileName": "*.json",
+				"folderPath": "json",
 				"fileSystem": "raw"
 			},
 			"columnDelimiter": ",",
