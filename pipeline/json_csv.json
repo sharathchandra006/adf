@@ -128,7 +128,13 @@
 										"outputs": [
 											{
 												"referenceName": "csvoutputrouting",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"fnn": {
+														"value": "@activity('Get Metadata1').output.childItems['name']",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									}
