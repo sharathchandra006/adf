@@ -1,0 +1,28 @@
+{
+	"name": "Json2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ds_csv_ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"jsonfile": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().jsonfile",
+					"type": "Expression"
+				},
+				"folderPath": "json",
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {}
+	}
+}

@@ -61,13 +61,61 @@
 								},
 								"ifFalseActivities": [
 									{
-										"name": "Wait2",
-										"type": "Wait",
+										"name": "Copy data2",
+										"type": "Copy",
 										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"waitTimeInSeconds": 1
-										}
+											"source": {
+												"type": "JsonSource",
+												"storeSettings": {
+													"type": "AzureBlobFSReadSettings",
+													"recursive": true,
+													"wildcardFolderPath": "source",
+													"wildcardFileName": "*.json",
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "JsonReadSettings"
+												}
+											},
+											"sink": {
+												"type": "JsonSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings",
+													"copyBehavior": "MergeFiles"
+												},
+												"formatSettings": {
+													"type": "JsonWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "Json1",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "Json2",
+												"type": "DatasetReference",
+												"parameters": {
+													"jsonfile": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												}
+											}
+										]
 									}
 								],
 								"ifTrueActivities": [
@@ -131,7 +179,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"fnn": {
-														"value": "@activity('Get Metadata1').output.childItems['name']",
+														"value": "@item().name",
 														"type": "Expression"
 													}
 												}
