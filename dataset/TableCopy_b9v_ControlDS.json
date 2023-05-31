@@ -1,0 +1,19 @@
+{
+	"name": "TableCopy_b9v_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "TableCopy_b9v_20230531"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "db",
+			"table": "MainControlTable_b9v"
+		}
+	}
+}
