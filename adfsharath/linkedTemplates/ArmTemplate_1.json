@@ -13,7 +13,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/TableCopy_b9v_BottomLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbtblcp_e5e_BottomLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -113,7 +113,7 @@
 														},
 														"inputs": [
 															{
-																"referenceName": "TableCopy_b9v_SourceDS",
+																"referenceName": "dbtblcp_e5e_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -129,9 +129,13 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "TableCopy_b9v_DestinationDS",
+																"referenceName": "dbtblcp_e5e_DestinationDS",
 																"type": "DatasetReference",
 																"parameters": {
+																	"cw_compressionCodec": {
+																		"value": "@json(item().SinkObjectSettings).compressionCodec",
+																		"type": "Expression"
+																	},
 																	"cw_fileName": {
 																		"value": "@json(item().SinkObjectSettings).fileName",
 																		"type": "Expression"
@@ -176,7 +180,7 @@
 																"partitionOption": "None"
 															},
 															"dataset": {
-																"referenceName": "TableCopy_b9v_SourceDS",
+																"referenceName": "dbtblcp_e5e_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -265,7 +269,7 @@
 														},
 														"inputs": [
 															{
-																"referenceName": "TableCopy_b9v_SourceDS",
+																"referenceName": "dbtblcp_e5e_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -281,9 +285,13 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "TableCopy_b9v_DestinationDS",
+																"referenceName": "dbtblcp_e5e_DestinationDS",
 																"type": "DatasetReference",
 																"parameters": {
+																	"cw_compressionCodec": {
+																		"value": "@json(item().SinkObjectSettings).compressionCodec",
+																		"type": "Expression"
+																	},
 																	"cw_fileName": {
 																		"value": "@{json(item().SinkObjectSettings).fileName}-@{json(item().DataLoadingBehaviorSettings).watermarkColumnStartValue}-@{activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue}",
 																		"type": "Expression"
@@ -320,7 +328,7 @@
 														},
 														"userProperties": [],
 														"typeProperties": {
-															"storedProcedureName": "[[db].[UpdateWatermarkColumnValue_b9v]",
+															"storedProcedureName": "[[db].[UpdateWatermarkColumnValue_e5e]",
 															"storedProcedureParameters": {
 																"Id": {
 																	"value": {
@@ -414,7 +422,7 @@
 												},
 												"inputs": [
 													{
-														"referenceName": "TableCopy_b9v_SourceDS",
+														"referenceName": "dbtblcp_e5e_SourceDS",
 														"type": "DatasetReference",
 														"parameters": {
 															"cw_schema": {
@@ -430,9 +438,13 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "TableCopy_b9v_DestinationDS",
+														"referenceName": "dbtblcp_e5e_DestinationDS",
 														"type": "DatasetReference",
 														"parameters": {
+															"cw_compressionCodec": {
+																"value": "@json(item().SinkObjectSettings).compressionCodec",
+																"type": "Expression"
+															},
 															"cw_fileName": {
 																"value": "@json(item().SinkObjectSettings).fileName",
 																"type": "Expression"
@@ -466,7 +478,7 @@
 					}
 				},
 				"folder": {
-					"name": "TableCopy_b9v_20230531"
+					"name": "dbtblcp_e5e_20230531"
 				},
 				"annotations": []
 			},
@@ -897,7 +909,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/TableCopy_b9v_MiddleLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbtblcp_e5e_MiddleLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -940,7 +952,7 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "TableCopy_b9v_ControlDS",
+											"referenceName": "dbtblcp_e5e_ControlDS",
 											"type": "DatasetReference",
 											"parameters": {}
 										},
@@ -962,7 +974,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "TableCopy_b9v_BottomLevel",
+											"referenceName": "dbtblcp_e5e_BottomLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1006,16 +1018,16 @@
 					}
 				},
 				"folder": {
-					"name": "TableCopy_b9v_20230531"
+					"name": "dbtblcp_e5e_20230531"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/TableCopy_b9v_BottomLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/dbtblcp_e5e_BottomLevel')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/TableCopy_b9v_TopLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbtblcp_e5e_TopLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1044,7 +1056,7 @@
 								"partitionOption": "None"
 							},
 							"dataset": {
-								"referenceName": "TableCopy_b9v_ControlDS",
+								"referenceName": "dbtblcp_e5e_ControlDS",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -1078,7 +1090,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "TableCopy_b9v_MiddleLevel",
+											"referenceName": "dbtblcp_e5e_MiddleLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1133,18 +1145,18 @@
 					},
 					"MainControlTableName": {
 						"type": "String",
-						"defaultValue": "db.MainControlTable_b9v"
+						"defaultValue": "db.MainControlTable_e5e"
 					}
 				},
 				"folder": {
-					"name": "TableCopy_b9v_20230531"
+					"name": "dbtblcp_e5e_20230531"
 				},
 				"annotations": [
 					"MetadataDrivenSolution"
 				]
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/TableCopy_b9v_MiddleLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/dbtblcp_e5e_MiddleLevel')]"
 			]
 		}
 	]
