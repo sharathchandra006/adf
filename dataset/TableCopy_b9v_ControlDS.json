@@ -12,8 +12,8 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "db",
-			"table": "MainControlTable_b9v"
+			"schema": "Application",
+			"table": "Cities"
 		}
 	}
 }
