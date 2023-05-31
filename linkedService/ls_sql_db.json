@@ -6,7 +6,7 @@
 		"type": "AzureSqlDatabase",
 		"typeProperties": {
 			"connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=sha-prac.database.windows.net;initial catalog=WWI;user id=sharath",
-			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZCMzE2OUZDLUYwRDItNDU2Ri05MUM2LUU4OTE2MzA2NzJDM184YjYwZjhhYy1hODM3LTRkNTItOTYyOS1hOWMxOTg2YjNlNDciDQp9"
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDZCMzE2OUZDLUYwRDItNDU2Ri05MUM2LUU4OTE2MzA2NzJDM182MzczNGZjNS1kMzcwLTQ0MjMtOWQ5NS01N2Q5ZDdiOWZkNGUiDQp9"
 		}
 	}
 }
