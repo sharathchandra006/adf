@@ -40,7 +40,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/copydb_fo1_BottomLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbcopy_tfd_BottomLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -140,7 +140,7 @@
 														},
 														"inputs": [
 															{
-																"referenceName": "copydb_fo1_SourceDS",
+																"referenceName": "dbcopy_tfd_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -156,7 +156,7 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "copydb_fo1_DestinationDS",
+																"referenceName": "dbcopy_tfd_DestinationDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_compressionCodec": {
@@ -207,7 +207,7 @@
 																"partitionOption": "None"
 															},
 															"dataset": {
-																"referenceName": "copydb_fo1_SourceDS",
+																"referenceName": "dbcopy_tfd_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -296,7 +296,7 @@
 														},
 														"inputs": [
 															{
-																"referenceName": "copydb_fo1_SourceDS",
+																"referenceName": "dbcopy_tfd_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_schema": {
@@ -312,7 +312,7 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "copydb_fo1_DestinationDS",
+																"referenceName": "dbcopy_tfd_DestinationDS",
 																"type": "DatasetReference",
 																"parameters": {
 																	"cw_compressionCodec": {
@@ -355,7 +355,7 @@
 														},
 														"userProperties": [],
 														"typeProperties": {
-															"storedProcedureName": "[[db].[UpdateWatermarkColumnValue_fo1]",
+															"storedProcedureName": "[[dbo].[UpdateWatermarkColumnValue_tfd]",
 															"storedProcedureParameters": {
 																"Id": {
 																	"value": {
@@ -449,7 +449,7 @@
 												},
 												"inputs": [
 													{
-														"referenceName": "copydb_fo1_SourceDS",
+														"referenceName": "dbcopy_tfd_SourceDS",
 														"type": "DatasetReference",
 														"parameters": {
 															"cw_schema": {
@@ -465,7 +465,7 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "copydb_fo1_DestinationDS",
+														"referenceName": "dbcopy_tfd_DestinationDS",
 														"type": "DatasetReference",
 														"parameters": {
 															"cw_compressionCodec": {
@@ -505,7 +505,7 @@
 					}
 				},
 				"folder": {
-					"name": "copydb_fo1_20230531"
+					"name": "dbcopy_tfd_20230601"
 				},
 				"annotations": []
 			},
@@ -938,7 +938,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/copydb_fo1_MiddleLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbcopy_tfd_MiddleLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -981,7 +981,7 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "copydb_fo1_ControlDS",
+											"referenceName": "dbcopy_tfd_ControlDS",
 											"type": "DatasetReference",
 											"parameters": {}
 										},
@@ -1003,7 +1003,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "copydb_fo1_BottomLevel",
+											"referenceName": "dbcopy_tfd_BottomLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1047,16 +1047,16 @@
 					}
 				},
 				"folder": {
-					"name": "copydb_fo1_20230531"
+					"name": "dbcopy_tfd_20230601"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/copydb_fo1_BottomLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/dbcopy_tfd_BottomLevel')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/copydb_fo1_TopLevel')]",
+			"name": "[concat(parameters('factoryName'), '/dbcopy_tfd_TopLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1085,7 +1085,7 @@
 								"partitionOption": "None"
 							},
 							"dataset": {
-								"referenceName": "copydb_fo1_ControlDS",
+								"referenceName": "dbcopy_tfd_ControlDS",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -1119,7 +1119,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "copydb_fo1_MiddleLevel",
+											"referenceName": "dbcopy_tfd_MiddleLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1174,18 +1174,18 @@
 					},
 					"MainControlTableName": {
 						"type": "String",
-						"defaultValue": "db.MainControlTable_fo1"
+						"defaultValue": "dbo.MainControlTable_tfd"
 					}
 				},
 				"folder": {
-					"name": "copydb_fo1_20230531"
+					"name": "dbcopy_tfd_20230601"
 				},
 				"annotations": [
 					"MetadataDrivenSolution"
 				]
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/copydb_fo1_MiddleLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/dbcopy_tfd_MiddleLevel')]"
 			]
 		}
 	]
