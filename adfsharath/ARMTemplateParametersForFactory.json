@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "adfsharath"
 		},
+		"checked_output_accountKey": {
+			"value": ""
+		},
 		"csvroutes_accountKey": {
 			"value": ""
 		},
@@ -14,14 +17,20 @@
 		"ds_csv_ls_accountKey": {
 			"value": ""
 		},
-		"outcsv_accountKey": {
-			"value": ""
-		},
 		"ds_source_csv_rec_check_accountKey": {
 			"value": ""
 		},
-		"checked_output_accountKey": {
+		"ls_sql_db_connectionString": {
 			"value": ""
+		},
+		"outcsv_accountKey": {
+			"value": ""
+		},
+		"rejcsv_accountKey": {
+			"value": ""
+		},
+		"checked_output_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
 		},
 		"csvroutes_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
@@ -32,13 +41,13 @@
 		"ds_csv_ls_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		},
-		"outcsv_properties_typeProperties_url": {
-			"value": "https://shaadf.dfs.core.windows.net/"
-		},
 		"ds_source_csv_rec_check_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		},
-		"checked_output_properties_typeProperties_url": {
+		"outcsv_properties_typeProperties_url": {
+			"value": "https://shaadf.dfs.core.windows.net/"
+		},
+		"rejcsv_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		}
 	}
