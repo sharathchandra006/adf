@@ -1,0 +1,19 @@
+{
+	"name": "copydb_fo1_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "copydb_fo1_20230531"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "db",
+			"table": "MainControlTable_fo1"
+		}
+	}
+}
