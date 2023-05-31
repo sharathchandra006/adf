@@ -39,6 +39,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'rejcsv'"
 		},
+		"sourcedb_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sourcedb'"
+		},
 		"checked_output_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://shaadf.dfs.core.windows.net/"
@@ -118,6 +122,9 @@
 					"rejcsv_accountKey": {
 						"value": "[parameters('rejcsv_accountKey')]"
 					},
+					"sourcedb_connectionString": {
+						"value": "[parameters('sourcedb_connectionString')]"
+					},
 					"checked_output_properties_typeProperties_url": {
 						"value": "[parameters('checked_output_properties_typeProperties_url')]"
 					},
@@ -142,6 +149,26 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "adfsharath_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adfsharath_ArmTemplate_0')]"
+			]
 		}
 	]
 }

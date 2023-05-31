@@ -29,6 +29,9 @@
 		"rejcsv_accountKey": {
 			"value": ""
 		},
+		"sourcedb_connectionString": {
+			"value": ""
+		},
 		"checked_output_properties_typeProperties_url": {
 			"value": "https://shaadf.dfs.core.windows.net/"
 		},
