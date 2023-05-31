@@ -1,0 +1,33 @@
+{
+	"name": "TableCopy_b9v_SourceDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_schema": {
+				"type": "String"
+			},
+			"cw_table": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "TableCopy_b9v_20230531"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().cw_schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().cw_table",
+				"type": "Expression"
+			}
+		}
+	}
+}
