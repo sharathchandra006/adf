@@ -1,0 +1,19 @@
+{
+	"name": "mdcp_qhp_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "mdcp_qhp_20230601"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_qhp"
+		}
+	}
+}
