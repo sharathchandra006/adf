@@ -1,0 +1,19 @@
+{
+	"name": "csvcopy_6g5_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "csvcopy_6g5_20230601"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_6g5"
+		}
+	}
+}
