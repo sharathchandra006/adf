@@ -750,12 +750,14 @@
 																}
 															},
 															"sink": {
-																"type": "ParquetSink",
+																"type": "DelimitedTextSink",
 																"storeSettings": {
 																	"type": "AzureBlobFSWriteSettings"
 																},
 																"formatSettings": {
-																	"type": "ParquetWriteSettings"
+																	"type": "DelimitedTextWriteSettings",
+																	"quoteAllText": true,
+																	"fileExtension": ".txt"
 																}
 															},
 															"enableStaging": false,
@@ -783,26 +785,9 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "mdcp_qhp_DestinationDS",
+																"referenceName": "DelimitedText1",
 																"type": "DatasetReference",
-																"parameters": {
-																	"cw_compressionCodec": {
-																		"value": "@json(item().SinkObjectSettings).compressionCodec",
-																		"type": "Expression"
-																	},
-																	"cw_fileName": {
-																		"value": "@{json(item().SinkObjectSettings).fileName}-@{json(item().DataLoadingBehaviorSettings).watermarkColumnStartValue}-@{activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue}",
-																		"type": "Expression"
-																	},
-																	"cw_folderPath": {
-																		"value": "@json(item().SinkObjectSettings).folderPath",
-																		"type": "Expression"
-																	},
-																	"cw_fileSystem": {
-																		"value": "@json(item().SinkObjectSettings).fileSystem",
-																		"type": "Expression"
-																	}
-																}
+																"parameters": {}
 															}
 														]
 													},
@@ -983,6 +968,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/mdcp_qhp_SourceDS')]",
 				"[concat(variables('factoryId'), '/datasets/mdcp_qhp_DestinationDS')]",
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/linkedServices/sourcedb')]"
 			]
 		},
