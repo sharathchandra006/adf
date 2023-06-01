@@ -1,0 +1,19 @@
+{
+	"name": "csvimport_fnf_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "csvimport_fnf_20230601"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "db",
+			"table": "srccntr"
+		}
+	}
+}
