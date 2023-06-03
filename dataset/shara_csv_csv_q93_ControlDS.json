@@ -1,0 +1,19 @@
+{
+	"name": "shara_csv_csv_q93_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "shara_csv_csv_q93_20230603"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_6g5"
+		}
+	}
+}
