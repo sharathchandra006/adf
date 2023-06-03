@@ -1,0 +1,19 @@
+{
+	"name": "MetadataDrivenCopyTask_New_4ly_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "MetadataDrivenCopyTask_New_4ly_20230603"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_6g5"
+		}
+	}
+}
