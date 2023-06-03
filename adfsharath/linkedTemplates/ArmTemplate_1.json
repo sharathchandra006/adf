@@ -40,7 +40,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/csvcopy_6g5_BottomLevel')]",
+			"name": "[concat(parameters('factoryName'), '/RaviDBtoCSV_5pm_BottomLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -88,7 +88,7 @@
 														"userProperties": [
 															{
 																"name": "Source",
-																"value": "@{json(item().SourceObjectSettings).fileSystem}/@{json(item().SourceObjectSettings).folderPath}/@{json(item().SourceObjectSettings).fileName}"
+																"value": "@{json(item().SourceObjectSettings).schema}.@{json(item().SourceObjectSettings).table}"
 															},
 															{
 																"name": "Destination",
@@ -97,24 +97,29 @@
 														],
 														"typeProperties": {
 															"source": {
-																"type": "DelimitedTextSource",
-																"storeSettings": {
-																	"type": "AzureBlobFSReadSettings",
-																	"recursive": {
-																		"value": "@json(item().CopySourceSettings).recursive",
+																"type": "AzureSqlSource",
+																"sqlReaderQuery": {
+																	"value": "@json(item().CopySourceSettings).sqlReaderQuery",
+																	"type": "Expression"
+																},
+																"partitionOption": {
+																	"value": "@json(item().CopySourceSettings).partitionOption",
+																	"type": "Expression"
+																},
+																"partitionSettings": {
+																	"partitionColumnName": {
+																		"value": "@json(item().CopySourceSettings).partitionColumnName",
 																		"type": "Expression"
 																	},
-																	"enablePartitionDiscovery": {
-																		"value": "@json(item().CopySourceSettings).enablePartitionDiscovery",
+																	"partitionUpperBound": {
+																		"value": "@json(item().CopySourceSettings).partitionUpperBound",
 																		"type": "Expression"
-																	}
-																},
-																"formatSettings": {
-																	"type": "DelimitedTextReadSettings",
-																	"skipLineCount": {
-																		"value": "@json(item().CopySourceSettings).skipLineCount",
+																	},
+																	"partitionLowerBound": {
+																		"value": "@json(item().CopySourceSettings).partitionLowerBound",
 																		"type": "Expression"
-																	}
+																	},
+																	"partitionNames": "@json(item().CopySourceSettings).partitionNames"
 																}
 															},
 															"sink": {
@@ -124,14 +129,8 @@
 																},
 																"formatSettings": {
 																	"type": "DelimitedTextWriteSettings",
-																	"quoteAllText": {
-																		"value": "@json(item().CopySinkSettings).quoteAllText",
-																		"type": "Expression"
-																	},
-																	"fileExtension": {
-																		"value": "@json(item().CopySinkSettings).fileExtension",
-																		"type": "Expression"
-																	}
+																	"quoteAllText": true,
+																	"fileExtension": ".txt"
 																}
 															},
 															"enableStaging": false,
@@ -143,35 +142,15 @@
 														},
 														"inputs": [
 															{
-																"referenceName": "csvcopy_6g5_SourceDS",
+																"referenceName": "RaviDBtoCSV_5pm_SourceDS",
 																"type": "DatasetReference",
 																"parameters": {
-																	"cw_columnDelimiter": {
-																		"value": "@json(item().SourceObjectSettings).columnDelimiter",
+																	"cw_schema": {
+																		"value": "@json(item().SourceObjectSettings).schema",
 																		"type": "Expression"
 																	},
-																	"cw_escapeChar": {
-																		"value": "@json(item().SourceObjectSettings).escapeChar",
-																		"type": "Expression"
-																	},
-																	"cw_quoteChar": {
-																		"value": "@json(item().SourceObjectSettings).quoteChar",
-																		"type": "Expression"
-																	},
-																	"cw_firstRowAsHeader": {
-																		"value": "@json(item().SourceObjectSettings).firstRowAsHeader",
-																		"type": "Expression"
-																	},
-																	"cw_fileName": {
-																		"value": "@json(item().SourceObjectSettings).fileName",
-																		"type": "Expression"
-																	},
-																	"cw_folderPath": {
-																		"value": "@json(item().SourceObjectSettings).folderPath",
-																		"type": "Expression"
-																	},
-																	"cw_fileSystem": {
-																		"value": "@json(item().SourceObjectSettings).fileSystem",
+																	"cw_table": {
+																		"value": "@json(item().SourceObjectSettings).table",
 																		"type": "Expression"
 																	}
 																}
@@ -179,21 +158,9 @@
 														],
 														"outputs": [
 															{
-																"referenceName": "csvcopy_6g5_DestinationDS",
+																"referenceName": "RaviDBtoCSV_5pm_DestinationDS",
 																"type": "DatasetReference",
 																"parameters": {
-																	"cw_columnDelimiter": {
-																		"value": "@json(item().SinkObjectSettings).columnDelimiter",
-																		"type": "Expression"
-																	},
-																	"cw_escapeChar": {
-																		"value": "@json(item().SinkObjectSettings).escapeChar",
-																		"type": "Expression"
-																	},
-																	"cw_quoteChar": {
-																		"value": "@json(item().SinkObjectSettings).quoteChar",
-																		"type": "Expression"
-																	},
 																	"cw_fileName": {
 																		"value": "@json(item().SinkObjectSettings).fileName",
 																		"type": "Expression"
@@ -209,6 +176,203 @@
 																}
 															}
 														]
+													}
+												]
+											},
+											{
+												"value": "DeltaLoad",
+												"activities": [
+													{
+														"name": "GetMaxWatermarkValue",
+														"description": "Query the source object to get the max value from watermark column",
+														"type": "Lookup",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"source": {
+																"type": "AzureSqlSource",
+																"sqlReaderQuery": {
+																	"value": "select max([@{json(item().DataLoadingBehaviorSettings).watermarkColumnName}]) as CurrentMaxWaterMarkColumnValue from [@{json(item().SourceObjectSettings).schema}].[@{json(item().SourceObjectSettings).table}]",
+																	"type": "Expression"
+																},
+																"partitionOption": "None"
+															},
+															"dataset": {
+																"referenceName": "RaviDBtoCSV_5pm_SourceDS",
+																"type": "DatasetReference",
+																"parameters": {
+																	"cw_schema": {
+																		"value": "@json(item().SourceObjectSettings).schema",
+																		"type": "Expression"
+																	},
+																	"cw_table": {
+																		"value": "@json(item().SourceObjectSettings).table",
+																		"type": "Expression"
+																	}
+																}
+															}
+														}
+													},
+													{
+														"name": "DeltaLoadOneObject",
+														"description": "Copy the changed data only from last time via comparing the value in watermark column to identify changes.",
+														"type": "Copy",
+														"dependsOn": [
+															{
+																"activity": "GetMaxWatermarkValue",
+																"dependencyConditions": [
+																	"Succeeded"
+																]
+															}
+														],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [
+															{
+																"name": "Source",
+																"value": "@{json(item().SourceObjectSettings).schema}.@{json(item().SourceObjectSettings).table}"
+															},
+															{
+																"name": "Destination",
+																"value": "@{json(item().SinkObjectSettings).fileSystem}/@{json(item().SinkObjectSettings).folderPath}/@{json(item().SinkObjectSettings).fileName}"
+															}
+														],
+														"typeProperties": {
+															"source": {
+																"type": "AzureSqlSource",
+																"sqlReaderQuery": {
+																	"value": "select * from [@{json(item().SourceObjectSettings).schema}].[@{json(item().SourceObjectSettings).table}] \n    where [@{json(item().DataLoadingBehaviorSettings).watermarkColumnName}] > @{if(contains(json(item().DataLoadingBehaviorSettings).watermarkColumnType, 'Int'),\n    json(item().DataLoadingBehaviorSettings).watermarkColumnStartValue, \n    concat('''', json(item().DataLoadingBehaviorSettings).watermarkColumnStartValue, ''''))}\n    and [@{json(item().DataLoadingBehaviorSettings).watermarkColumnName}] <= @{if(contains(json(item().DataLoadingBehaviorSettings).watermarkColumnType, 'Int'),\n    activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue, \n    concat('''', activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue, ''''))}",
+																	"type": "Expression"
+																},
+																"partitionOption": {
+																	"value": "@json(item().CopySourceSettings).partitionOption",
+																	"type": "Expression"
+																},
+																"partitionSettings": {
+																	"partitionColumnName": {
+																		"value": "@json(item().CopySourceSettings).partitionColumnName",
+																		"type": "Expression"
+																	},
+																	"partitionUpperBound": {
+																		"value": "@json(item().CopySourceSettings).partitionUpperBound",
+																		"type": "Expression"
+																	},
+																	"partitionLowerBound": {
+																		"value": "@json(item().CopySourceSettings).partitionLowerBound",
+																		"type": "Expression"
+																	},
+																	"partitionNames": "@json(item().CopySourceSettings).partitionNames"
+																}
+															},
+															"sink": {
+																"type": "DelimitedTextSink",
+																"storeSettings": {
+																	"type": "AzureBlobFSWriteSettings"
+																},
+																"formatSettings": {
+																	"type": "DelimitedTextWriteSettings",
+																	"quoteAllText": true,
+																	"fileExtension": ".txt"
+																}
+															},
+															"enableStaging": false,
+															"validateDataConsistency": false,
+															"translator": {
+																"value": "@json(item().CopyActivitySettings).translator",
+																"type": "Expression"
+															}
+														},
+														"inputs": [
+															{
+																"referenceName": "RaviDBtoCSV_5pm_SourceDS",
+																"type": "DatasetReference",
+																"parameters": {
+																	"cw_schema": {
+																		"value": "@json(item().SourceObjectSettings).schema",
+																		"type": "Expression"
+																	},
+																	"cw_table": {
+																		"value": "@json(item().SourceObjectSettings).table",
+																		"type": "Expression"
+																	}
+																}
+															}
+														],
+														"outputs": [
+															{
+																"referenceName": "RaviDBtoCSV_5pm_DestinationDS",
+																"type": "DatasetReference",
+																"parameters": {
+																	"cw_fileName": {
+																		"value": "@{json(item().SinkObjectSettings).fileName}-@{json(item().DataLoadingBehaviorSettings).watermarkColumnStartValue}-@{activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue}",
+																		"type": "Expression"
+																	},
+																	"cw_folderPath": {
+																		"value": "@json(item().SinkObjectSettings).folderPath",
+																		"type": "Expression"
+																	},
+																	"cw_fileSystem": {
+																		"value": "@json(item().SinkObjectSettings).fileSystem",
+																		"type": "Expression"
+																	}
+																}
+															}
+														]
+													},
+													{
+														"name": "UpdateWatermarkColumnValue",
+														"type": "SqlServerStoredProcedure",
+														"dependsOn": [
+															{
+																"activity": "DeltaLoadOneObject",
+																"dependencyConditions": [
+																	"Succeeded"
+																]
+															}
+														],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"storedProcedureName": "[[UpdateWatermarkColumnValue_5pm]",
+															"storedProcedureParameters": {
+																"Id": {
+																	"value": {
+																		"value": "@item().Id",
+																		"type": "Expression"
+																	},
+																	"type": "Int32"
+																},
+																"watermarkColumnStartValue": {
+																	"value": {
+																		"value": "@activity('GetMaxWatermarkValue').output.firstRow.CurrentMaxWaterMarkColumnValue",
+																		"type": "Expression"
+																	},
+																	"type": "String"
+																}
+															}
+														},
+														"linkedServiceName": {
+															"referenceName": "ls_sql_db",
+															"type": "LinkedServiceReference"
+														}
 													}
 												]
 											}
@@ -229,7 +393,7 @@
 												"userProperties": [
 													{
 														"name": "Source",
-														"value": "@{json(item().SourceObjectSettings).fileSystem}/@{json(item().SourceObjectSettings).folderPath}/@{json(item().SourceObjectSettings).fileName}"
+														"value": "@{json(item().SourceObjectSettings).schema}.@{json(item().SourceObjectSettings).table}"
 													},
 													{
 														"name": "Destination",
@@ -238,24 +402,29 @@
 												],
 												"typeProperties": {
 													"source": {
-														"type": "DelimitedTextSource",
-														"storeSettings": {
-															"type": "AzureBlobFSReadSettings",
-															"recursive": {
-																"value": "@json(item().CopySourceSettings).recursive",
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "@json(item().CopySourceSettings).sqlReaderQuery",
+															"type": "Expression"
+														},
+														"partitionOption": {
+															"value": "@json(item().CopySourceSettings).partitionOption",
+															"type": "Expression"
+														},
+														"partitionSettings": {
+															"partitionColumnName": {
+																"value": "@json(item().CopySourceSettings).partitionColumnName",
 																"type": "Expression"
 															},
-															"enablePartitionDiscovery": {
-																"value": "@json(item().CopySourceSettings).enablePartitionDiscovery",
+															"partitionUpperBound": {
+																"value": "@json(item().CopySourceSettings).partitionUpperBound",
 																"type": "Expression"
-															}
-														},
-														"formatSettings": {
-															"type": "DelimitedTextReadSettings",
-															"skipLineCount": {
-																"value": "@json(item().CopySourceSettings).skipLineCount",
+															},
+															"partitionLowerBound": {
+																"value": "@json(item().CopySourceSettings).partitionLowerBound",
 																"type": "Expression"
-															}
+															},
+															"partitionNames": "@json(item().CopySourceSettings).partitionNames"
 														}
 													},
 													"sink": {
@@ -265,14 +434,8 @@
 														},
 														"formatSettings": {
 															"type": "DelimitedTextWriteSettings",
-															"quoteAllText": {
-																"value": "@json(item().CopySinkSettings).quoteAllText",
-																"type": "Expression"
-															},
-															"fileExtension": {
-																"value": "@json(item().CopySinkSettings).fileExtension",
-																"type": "Expression"
-															}
+															"quoteAllText": true,
+															"fileExtension": ".txt"
 														}
 													},
 													"enableStaging": false,
@@ -284,35 +447,15 @@
 												},
 												"inputs": [
 													{
-														"referenceName": "csvcopy_6g5_SourceDS",
+														"referenceName": "RaviDBtoCSV_5pm_SourceDS",
 														"type": "DatasetReference",
 														"parameters": {
-															"cw_columnDelimiter": {
-																"value": "@json(item().SourceObjectSettings).columnDelimiter",
+															"cw_schema": {
+																"value": "@json(item().SourceObjectSettings).schema",
 																"type": "Expression"
 															},
-															"cw_escapeChar": {
-																"value": "@json(item().SourceObjectSettings).escapeChar",
-																"type": "Expression"
-															},
-															"cw_quoteChar": {
-																"value": "@json(item().SourceObjectSettings).quoteChar",
-																"type": "Expression"
-															},
-															"cw_firstRowAsHeader": {
-																"value": "@json(item().SourceObjectSettings).firstRowAsHeader",
-																"type": "Expression"
-															},
-															"cw_fileName": {
-																"value": "@json(item().SourceObjectSettings).fileName",
-																"type": "Expression"
-															},
-															"cw_folderPath": {
-																"value": "@json(item().SourceObjectSettings).folderPath",
-																"type": "Expression"
-															},
-															"cw_fileSystem": {
-																"value": "@json(item().SourceObjectSettings).fileSystem",
+															"cw_table": {
+																"value": "@json(item().SourceObjectSettings).table",
 																"type": "Expression"
 															}
 														}
@@ -320,21 +463,9 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "csvcopy_6g5_DestinationDS",
+														"referenceName": "RaviDBtoCSV_5pm_DestinationDS",
 														"type": "DatasetReference",
 														"parameters": {
-															"cw_columnDelimiter": {
-																"value": "@json(item().SinkObjectSettings).columnDelimiter",
-																"type": "Expression"
-															},
-															"cw_escapeChar": {
-																"value": "@json(item().SinkObjectSettings).escapeChar",
-																"type": "Expression"
-															},
-															"cw_quoteChar": {
-																"value": "@json(item().SinkObjectSettings).quoteChar",
-																"type": "Expression"
-															},
 															"cw_fileName": {
 																"value": "@json(item().SinkObjectSettings).fileName",
 																"type": "Expression"
@@ -368,7 +499,7 @@
 					}
 				},
 				"folder": {
-					"name": "csvcopy_6g5_20230601"
+					"name": "RaviDBtoCSV_5pm_20230603"
 				},
 				"annotations": []
 			},
@@ -801,7 +932,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/csvcopy_6g5_MiddleLevel')]",
+			"name": "[concat(parameters('factoryName'), '/RaviDBtoCSV_5pm_MiddleLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -844,7 +975,7 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "csvcopy_6g5_ControlDS",
+											"referenceName": "RaviDBtoCSV_5pm_ControlDS",
 											"type": "DatasetReference",
 											"parameters": {}
 										},
@@ -866,7 +997,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "csvcopy_6g5_BottomLevel",
+											"referenceName": "RaviDBtoCSV_5pm_BottomLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -910,16 +1041,16 @@
 					}
 				},
 				"folder": {
-					"name": "csvcopy_6g5_20230601"
+					"name": "RaviDBtoCSV_5pm_20230603"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/csvcopy_6g5_BottomLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/RaviDBtoCSV_5pm_BottomLevel')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/csvcopy_6g5_TopLevel')]",
+			"name": "[concat(parameters('factoryName'), '/RaviDBtoCSV_5pm_TopLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -948,7 +1079,7 @@
 								"partitionOption": "None"
 							},
 							"dataset": {
-								"referenceName": "csvcopy_6g5_ControlDS",
+								"referenceName": "RaviDBtoCSV_5pm_ControlDS",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -982,7 +1113,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "csvcopy_6g5_MiddleLevel",
+											"referenceName": "RaviDBtoCSV_5pm_MiddleLevel",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1041,14 +1172,14 @@
 					}
 				},
 				"folder": {
-					"name": "csvcopy_6g5_20230601"
+					"name": "RaviDBtoCSV_5pm_20230603"
 				},
 				"annotations": [
 					"MetadataDrivenSolution"
 				]
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/csvcopy_6g5_MiddleLevel')]"
+				"[concat(variables('factoryId'), '/pipelines/RaviDBtoCSV_5pm_MiddleLevel')]"
 			]
 		}
 	]
