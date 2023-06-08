@@ -465,7 +465,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "select '@{item().RowNumber}' as Id,'@{pipeline().RunId}' as TriggerName",
+										"value": "select '@{item().RowNumber}' as Id,'@{pipeline().RunId}' as TriggerName, '@{activity('RouteJobsBasedOnLoadingBehavior').output.rowsRead}'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
