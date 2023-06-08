@@ -268,7 +268,7 @@
 															"source": {
 																"type": "AzureSqlSource",
 																"sqlReaderQuery": {
-																	"value": "select '@{activity('FullLoadOneObject').output.rowsRead}' as TaskId",
+																	"value": "select '@{activity('FullLoadOneObject').output.rowsRead}' as TaskId, '@{activity('FullLoadOneObject').output.status}' as CopyEnabled",
 																	"type": "Expression"
 																},
 																"queryTimeout": "02:00:00",
