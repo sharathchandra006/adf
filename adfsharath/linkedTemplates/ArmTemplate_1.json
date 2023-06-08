@@ -803,7 +803,7 @@
 									"typeProperties": {
 										"variableName": "rowcount",
 										"value": {
-											"value": "@activity('RouteJobsBasedOnLoadingBehavior').output.rowsRead",
+											"value": "@activity('RouteJobsBasedOnLoadingBehavior').output",
 											"type": "Expression"
 										}
 									}
