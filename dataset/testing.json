@@ -1,0 +1,71 @@
+{
+	"name": "testing",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SourceObjectSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SourceConnectionSettingsName",
+				"type": "varchar"
+			},
+			{
+				"name": "CopySourceSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SinkObjectSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SinkConnectionSettingsName",
+				"type": "varchar"
+			},
+			{
+				"name": "CopySinkSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CopyActivitySettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TopLevelPipelineName",
+				"type": "varchar"
+			},
+			{
+				"name": "TriggerName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DataLoadingBehaviorSettings",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TaskId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CopyEnabled",
+				"type": "bit"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_6g5"
+		}
+	}
+}
