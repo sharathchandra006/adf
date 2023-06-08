@@ -752,7 +752,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "select '@{item().RowNumber} as Id",
+												"value": "select '@{item().RowNumber} as Id,'@{pipeline().RunId} as TriggerName",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
