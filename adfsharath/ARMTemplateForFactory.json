@@ -576,7 +576,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "select '@{item().RowNumber}' as Id,'@{pipeline().RunId}' as TriggerName, '@{activity('RouteJobsBasedOnLoadingBehavior').output.rowsRead[0]}' as TaskId",
+												"value": "select '@{activity('RouteJobsBasedOnLoadingBehavior').output.rowsCopied}' as TaskId",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
