@@ -77,6 +77,37 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/Exec')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "RaviDBtoCSV_5pm_TopLevel",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/RaviDBtoCSV_5pm_TopLevel')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/RaviDBtoCSV_5pm_BottomLevel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -521,6 +552,65 @@
 											}
 										]
 									}
+								},
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "RouteJobsBasedOnLoadingBehavior",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "select '@{item().RowNumber} as Id",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "testing",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "testing",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
 								}
 							]
 						}
@@ -541,6 +631,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/testing')]",
 				"[concat(variables('factoryId'), '/datasets/RaviDBtoCSV_5pm_SourceDS')]",
 				"[concat(variables('factoryId'), '/datasets/RaviDBtoCSV_5pm_DestinationDS')]",
 				"[concat(variables('factoryId'), '/linkedServices/ls_sql_db')]"
@@ -1234,6 +1325,613 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_BottomLevel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline will copy objects from one group. The objects belonging to this group will be copied parallelly.",
+				"activities": [
+					{
+						"name": "ListObjectsFromOneGroup",
+						"description": "List objects from one group and iterate each of them to downstream activities",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.ObjectsPerGroupToCopy",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "RouteJobsBasedOnLoadingBehavior",
+									"description": "Check the loading behavior for each object if it requires full load or incremental load. If it is Default or FullLoad case, do full load. If it is DeltaLoad case, do incremental load.",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@json(item().DataLoadingBehaviorSettings).dataLoadingBehavior",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "FullLoad",
+												"activities": [
+													{
+														"name": "FullLoadOneObject",
+														"description": "Take a full snapshot on this object and copy it to the destination",
+														"type": "Copy",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [
+															{
+																"name": "Source",
+																"value": "@{json(item().SourceObjectSettings).fileSystem}/@{json(item().SourceObjectSettings).folderPath}/@{json(item().SourceObjectSettings).fileName}"
+															},
+															{
+																"name": "Destination",
+																"value": "@{json(item().SinkObjectSettings).fileSystem}/@{json(item().SinkObjectSettings).folderPath}/@{json(item().SinkObjectSettings).fileName}"
+															}
+														],
+														"typeProperties": {
+															"source": {
+																"type": "DelimitedTextSource",
+																"storeSettings": {
+																	"type": "AzureBlobFSReadSettings",
+																	"recursive": {
+																		"value": "@json(item().CopySourceSettings).recursive",
+																		"type": "Expression"
+																	},
+																	"wildcardFileName": {
+																		"value": "@json(item().CopySourceSettings).wildcardFileName",
+																		"type": "Expression"
+																	},
+																	"enablePartitionDiscovery": {
+																		"value": "@json(item().CopySourceSettings).enablePartitionDiscovery",
+																		"type": "Expression"
+																	}
+																},
+																"formatSettings": {
+																	"type": "DelimitedTextReadSettings",
+																	"skipLineCount": {
+																		"value": "@json(item().CopySourceSettings).skipLineCount",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"sink": {
+																"type": "DelimitedTextSink",
+																"storeSettings": {
+																	"type": "AzureBlobFSWriteSettings"
+																},
+																"formatSettings": {
+																	"type": "DelimitedTextWriteSettings",
+																	"quoteAllText": {
+																		"value": "@json(item().CopySinkSettings).quoteAllText",
+																		"type": "Expression"
+																	},
+																	"fileExtension": {
+																		"value": "@json(item().CopySinkSettings).fileExtension",
+																		"type": "Expression"
+																	}
+																}
+															},
+															"enableStaging": false,
+															"validateDataConsistency": false,
+															"translator": {
+																"value": "@json(item().CopyActivitySettings).translator",
+																"type": "Expression"
+															}
+														},
+														"inputs": [
+															{
+																"referenceName": "shara_csv_csv_q93_SourceDS",
+																"type": "DatasetReference",
+																"parameters": {
+																	"cw_columnDelimiter": {
+																		"value": "@json(item().SourceObjectSettings).columnDelimiter",
+																		"type": "Expression"
+																	},
+																	"cw_escapeChar": {
+																		"value": "@json(item().SourceObjectSettings).escapeChar",
+																		"type": "Expression"
+																	},
+																	"cw_quoteChar": {
+																		"value": "@json(item().SourceObjectSettings).quoteChar",
+																		"type": "Expression"
+																	},
+																	"cw_firstRowAsHeader": {
+																		"value": "@json(item().SourceObjectSettings).firstRowAsHeader",
+																		"type": "Expression"
+																	},
+																	"cw_fileName": {
+																		"value": "@json(item().SourceObjectSettings).fileName",
+																		"type": "Expression"
+																	},
+																	"cw_folderPath": {
+																		"value": "@json(item().SourceObjectSettings).folderPath",
+																		"type": "Expression"
+																	},
+																	"cw_fileSystem": {
+																		"value": "@json(item().SourceObjectSettings).fileSystem",
+																		"type": "Expression"
+																	}
+																}
+															}
+														],
+														"outputs": [
+															{
+																"referenceName": "shara_csv_csv_q93_DestinationDS",
+																"type": "DatasetReference",
+																"parameters": {
+																	"cw_columnDelimiter": {
+																		"value": "@json(item().SinkObjectSettings).columnDelimiter",
+																		"type": "Expression"
+																	},
+																	"cw_escapeChar": {
+																		"value": "@json(item().SinkObjectSettings).escapeChar",
+																		"type": "Expression"
+																	},
+																	"cw_quoteChar": {
+																		"value": "@json(item().SinkObjectSettings).quoteChar",
+																		"type": "Expression"
+																	},
+																	"cw_firstRowAsHeader": {
+																		"value": "@json(item().SinkObjectSettings).firstRowAsHeader",
+																		"type": "Expression"
+																	},
+																	"cw_fileName": {
+																		"value": "@json(item().SinkObjectSettings).fileName",
+																		"type": "Expression"
+																	},
+																	"cw_folderPath": {
+																		"value": "@json(item().SinkObjectSettings).folderPath",
+																		"type": "Expression"
+																	},
+																	"cw_fileSystem": {
+																		"value": "@json(item().SinkObjectSettings).fileSystem",
+																		"type": "Expression"
+																	}
+																}
+															}
+														]
+													}
+												]
+											}
+										],
+										"defaultActivities": [
+											{
+												"name": "DefaultFullLoadOneObject",
+												"description": "Take a full snapshot on this object and copy it to the destination",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [
+													{
+														"name": "Source",
+														"value": "@{json(item().SourceObjectSettings).fileSystem}/@{json(item().SourceObjectSettings).folderPath}/@{json(item().SourceObjectSettings).fileName}"
+													},
+													{
+														"name": "Destination",
+														"value": "@{json(item().SinkObjectSettings).fileSystem}/@{json(item().SinkObjectSettings).folderPath}/@{json(item().SinkObjectSettings).fileName}"
+													}
+												],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobFSReadSettings",
+															"recursive": {
+																"value": "@json(item().CopySourceSettings).recursive",
+																"type": "Expression"
+															},
+															"wildcardFileName": {
+																"value": "@json(item().CopySourceSettings).wildcardFileName",
+																"type": "Expression"
+															},
+															"enablePartitionDiscovery": {
+																"value": "@json(item().CopySourceSettings).enablePartitionDiscovery",
+																"type": "Expression"
+															}
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings",
+															"skipLineCount": {
+																"value": "@json(item().CopySourceSettings).skipLineCount",
+																"type": "Expression"
+															}
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": {
+																"value": "@json(item().CopySinkSettings).quoteAllText",
+																"type": "Expression"
+															},
+															"fileExtension": {
+																"value": "@json(item().CopySinkSettings).fileExtension",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableStaging": false,
+													"validateDataConsistency": false,
+													"translator": {
+														"value": "@json(item().CopyActivitySettings).translator",
+														"type": "Expression"
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "shara_csv_csv_q93_SourceDS",
+														"type": "DatasetReference",
+														"parameters": {
+															"cw_columnDelimiter": {
+																"value": "@json(item().SourceObjectSettings).columnDelimiter",
+																"type": "Expression"
+															},
+															"cw_escapeChar": {
+																"value": "@json(item().SourceObjectSettings).escapeChar",
+																"type": "Expression"
+															},
+															"cw_quoteChar": {
+																"value": "@json(item().SourceObjectSettings).quoteChar",
+																"type": "Expression"
+															},
+															"cw_firstRowAsHeader": {
+																"value": "@json(item().SourceObjectSettings).firstRowAsHeader",
+																"type": "Expression"
+															},
+															"cw_fileName": {
+																"value": "@json(item().SourceObjectSettings).fileName",
+																"type": "Expression"
+															},
+															"cw_folderPath": {
+																"value": "@json(item().SourceObjectSettings).folderPath",
+																"type": "Expression"
+															},
+															"cw_fileSystem": {
+																"value": "@json(item().SourceObjectSettings).fileSystem",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "shara_csv_csv_q93_DestinationDS",
+														"type": "DatasetReference",
+														"parameters": {
+															"cw_columnDelimiter": {
+																"value": "@json(item().SinkObjectSettings).columnDelimiter",
+																"type": "Expression"
+															},
+															"cw_escapeChar": {
+																"value": "@json(item().SinkObjectSettings).escapeChar",
+																"type": "Expression"
+															},
+															"cw_quoteChar": {
+																"value": "@json(item().SinkObjectSettings).quoteChar",
+																"type": "Expression"
+															},
+															"cw_firstRowAsHeader": {
+																"value": "@json(item().SinkObjectSettings).firstRowAsHeader",
+																"type": "Expression"
+															},
+															"cw_fileName": {
+																"value": "@json(item().SinkObjectSettings).fileName",
+																"type": "Expression"
+															},
+															"cw_folderPath": {
+																"value": "@json(item().SinkObjectSettings).folderPath",
+																"type": "Expression"
+															},
+															"cw_fileSystem": {
+																"value": "@json(item().SinkObjectSettings).fileSystem",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"ObjectsPerGroupToCopy": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/shara_csv_csv_q93_SourceDS')]",
+				"[concat(variables('factoryId'), '/datasets/shara_csv_csv_q93_DestinationDS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_MiddleLevel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline will copy one batch of objects. The objects belonging to this batch will be copied parallelly.",
+				"activities": [
+					{
+						"name": "DivideOneBatchIntoMultipleGroups",
+						"description": "Divide objects from single batch into multiple sub parallel groups to avoid reaching the output limit of lookup activity.",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@range(0, add(div(pipeline().parameters.SumOfObjectsToCopyForCurrentBatch, pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity),\n                    if(equals(mod(pipeline().parameters.SumOfObjectsToCopyForCurrentBatch, pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity), 0), 0, 1)))",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 50,
+							"activities": [
+								{
+									"name": "GetObjectsPerGroupToCopy",
+									"description": "Get objects (tables etc.) from control table required to be copied in this group. The order of objects to be copied following the TaskId in control table (ORDER BY [TaskId] DESC).",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "WITH OrderedControlTable AS (\n                             SELECT *, ROW_NUMBER() OVER (ORDER BY [TaskId], [Id] DESC) AS RowNumber\n                             FROM @{pipeline().parameters.MainControlTableName}\n                             where TopLevelPipelineName = '@{pipeline().parameters.TopLevelPipelineName}'\n                             and TriggerName like '%@{pipeline().parameters.TriggerName}%' and CopyEnabled = 1)\n                             SELECT * FROM OrderedControlTable WHERE RowNumber BETWEEN @{add(mul(int(item()),pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity),\n                             add(mul(pipeline().parameters.SumOfObjectsToCopyForCurrentBatch, pipeline().parameters.CurrentSequentialNumberOfBatch), 1))}\n                             AND @{min(add(mul(int(item()), pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity), add(mul(pipeline().parameters.SumOfObjectsToCopyForCurrentBatch, pipeline().parameters.CurrentSequentialNumberOfBatch),\n                             pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity)),\n                            mul(pipeline().parameters.SumOfObjectsToCopyForCurrentBatch, add(pipeline().parameters.CurrentSequentialNumberOfBatch,1)), pipeline().parameters.SumOfObjectsToCopy)}",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "shara_csv_csv_q93_ControlDS",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "CopyObjectsInOneGroup",
+									"description": "Execute another pipeline to copy objects from one group. The objects belonging to this group will be copied parallelly.",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "GetObjectsPerGroupToCopy",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "shara_csv_csv_q93_BottomLevel",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ObjectsPerGroupToCopy": {
+												"value": "@activity('GetObjectsPerGroupToCopy').output.value",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"MaxNumberOfObjectsReturnedFromLookupActivity": {
+						"type": "Int"
+					},
+					"TopLevelPipelineName": {
+						"type": "String"
+					},
+					"TriggerName": {
+						"type": "String"
+					},
+					"CurrentSequentialNumberOfBatch": {
+						"type": "Int"
+					},
+					"SumOfObjectsToCopy": {
+						"type": "Int"
+					},
+					"SumOfObjectsToCopyForCurrentBatch": {
+						"type": "Int"
+					},
+					"MainControlTableName": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/shara_csv_csv_q93_ControlDS')]",
+				"[concat(variables('factoryId'), '/pipelines/shara_csv_csv_q93_BottomLevel')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_TopLevel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline will count the total number of objects (tables etc.) required to be copied in this run, come up with the number of sequential batches based on the max allowed concurrent copy task, and then execute another pipeline to copy different batches sequentially.",
+				"activities": [
+					{
+						"name": "GetSumOfObjectsToCopy",
+						"description": "Count the total number of objects (tables etc.) required to be copied in this run.",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT count(*) as count FROM @{pipeline().parameters.MainControlTableName} where TopLevelPipelineName='@{pipeline().Pipeline}' and TriggerName like '%@{pipeline().TriggerName}%' and CopyEnabled = 1",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "shara_csv_csv_q93_ControlDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CopyBatchesOfObjectsSequentially",
+						"description": "Come up with the number of sequential batches based on the max allowed concurrent copy tasks, and then execute another pipeline to copy different batches sequentially.",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetSumOfObjectsToCopy",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@range(0, add(div(activity('GetSumOfObjectsToCopy').output.firstRow.count,\n                    pipeline().parameters.MaxNumberOfConcurrentTasks),\n                    if(equals(mod(activity('GetSumOfObjectsToCopy').output.firstRow.count,\n                    pipeline().parameters.MaxNumberOfConcurrentTasks), 0), 0, 1)))",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "CopyObjectsInOneBatch",
+									"description": "Execute another pipeline to copy one batch of objects. The objects belonging to this batch will be copied parallelly.",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "shara_csv_csv_q93_MiddleLevel",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"MaxNumberOfObjectsReturnedFromLookupActivity": {
+												"value": "@pipeline().parameters.MaxNumberOfObjectsReturnedFromLookupActivity",
+												"type": "Expression"
+											},
+											"TopLevelPipelineName": {
+												"value": "@{pipeline().Pipeline}",
+												"type": "Expression"
+											},
+											"TriggerName": {
+												"value": "@{pipeline().TriggerName}",
+												"type": "Expression"
+											},
+											"CurrentSequentialNumberOfBatch": {
+												"value": "@item()",
+												"type": "Expression"
+											},
+											"SumOfObjectsToCopy": {
+												"value": "@activity('GetSumOfObjectsToCopy').output.firstRow.count",
+												"type": "Expression"
+											},
+											"SumOfObjectsToCopyForCurrentBatch": {
+												"value": "@min(pipeline().parameters.MaxNumberOfConcurrentTasks, activity('GetSumOfObjectsToCopy').output.firstRow.count)",
+												"type": "Expression"
+											},
+											"MainControlTableName": {
+												"value": "@pipeline().parameters.MainControlTableName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"MaxNumberOfObjectsReturnedFromLookupActivity": {
+						"type": "Int",
+						"defaultValue": 5000
+					},
+					"MaxNumberOfConcurrentTasks": {
+						"type": "Int",
+						"defaultValue": 20
+					},
+					"MainControlTableName": {
+						"type": "String",
+						"defaultValue": "dbo.MainControlTable_6g5"
+					}
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": [
+					"MetadataDrivenSolution"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/shara_csv_csv_q93_ControlDS')]",
+				"[concat(variables('factoryId'), '/pipelines/shara_csv_csv_q93_MiddleLevel')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1655,6 +2353,258 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ds_source_csv_rec_check')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_ControlDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_db",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "MainControlTable_6g5"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_db')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_DestinationDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "csvrouting",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_columnDelimiter": {
+						"type": "String"
+					},
+					"cw_escapeChar": {
+						"type": "String"
+					},
+					"cw_quoteChar": {
+						"type": "String"
+					},
+					"cw_firstRowAsHeader": {
+						"type": "Bool"
+					},
+					"cw_fileName": {
+						"type": "Object"
+					},
+					"cw_folderPath": {
+						"type": "String"
+					},
+					"cw_fileSystem": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().cw_folderPath",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().cw_fileSystem",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().cw_columnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().cw_escapeChar",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@dataset().cw_firstRowAsHeader",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().cw_quoteChar",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/csvrouting')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shara_csv_csv_q93_SourceDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ds_csv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_columnDelimiter": {
+						"type": "String"
+					},
+					"cw_escapeChar": {
+						"type": "String"
+					},
+					"cw_quoteChar": {
+						"type": "String"
+					},
+					"cw_firstRowAsHeader": {
+						"type": "Bool"
+					},
+					"cw_fileName": {
+						"type": "Object"
+					},
+					"cw_folderPath": {
+						"type": "Object"
+					},
+					"cw_fileSystem": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "shara_csv_csv_q93_20230603"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().cw_folderPath",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().cw_fileSystem",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": {
+						"value": "@dataset().cw_columnDelimiter",
+						"type": "Expression"
+					},
+					"escapeChar": {
+						"value": "@dataset().cw_escapeChar",
+						"type": "Expression"
+					},
+					"firstRowAsHeader": {
+						"value": "@dataset().cw_firstRowAsHeader",
+						"type": "Expression"
+					},
+					"quoteChar": {
+						"value": "@dataset().cw_quoteChar",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ds_csv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/testing')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SourceObjectSettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SourceConnectionSettingsName",
+						"type": "varchar"
+					},
+					{
+						"name": "CopySourceSettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SinkObjectSettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SinkConnectionSettingsName",
+						"type": "varchar"
+					},
+					{
+						"name": "CopySinkSettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CopyActivitySettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TopLevelPipelineName",
+						"type": "varchar"
+					},
+					{
+						"name": "TriggerName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DataLoadingBehaviorSettings",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TaskId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CopyEnabled",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "MainControlTable_6g5"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sourcedb')]"
 			]
 		},
 		{
