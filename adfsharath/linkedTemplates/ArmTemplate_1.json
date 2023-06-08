@@ -444,7 +444,7 @@
 															"source": {
 																"type": "AzureSqlSource",
 																"sqlReaderQuery": {
-																	"value": "select '@{activity('FullLoadOneObject').output.rowsRead}' as TaskId, '@{pipeline().RunId}' as TriggerName, '@{pipeline().TriggeredByPipelineName}' as ",
+																	"value": "select '@{activity('FullLoadOneObject').output.rowsRead}' as TaskId, '@{pipeline().RunId}' as TriggerName, '@{pipeline().TriggeredByPipelineName}' as TopLevelPipelineName",
 																	"type": "Expression"
 																},
 																"queryTimeout": "02:00:00",
