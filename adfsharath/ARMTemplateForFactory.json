@@ -558,7 +558,7 @@
 									"type": "Copy",
 									"dependsOn": [
 										{
-											"activity": "RouteJobsBasedOnLoadingBehavior",
+											"activity": "Set variable1",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -576,7 +576,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "select 'activity('RouteJobsBasedOnLoadingBehavior').output' as TaskId",
+												"value": "select '@{variables('rowcount')}' as TaskId",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -611,6 +611,26 @@
 											"parameters": {}
 										}
 									]
+								},
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "RouteJobsBasedOnLoadingBehavior",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "rowcount",
+										"value": {
+											"value": "@activity('RouteJobsBasedOnLoadingBehavior').output.rowsRead",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -623,6 +643,11 @@
 				"parameters": {
 					"ObjectsPerGroupToCopy": {
 						"type": "Array"
+					}
+				},
+				"variables": {
+					"rowcount": {
+						"type": "String"
 					}
 				},
 				"folder": {
